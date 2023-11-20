@@ -7,7 +7,7 @@ Here is a brief description of the FluViewer process. First, the provided reads 
 ## Installation
 1. Create a virtual environment and install the necessary dependencies using the YAML file provided in this repository. For example, if using conda:
 ```
-conda create -n FluViewer -f FluViewer_v_0_1_x.yaml
+conda create -n FluViewer -f environment.yaml
 ```
 
 2. Activate the FluViewer environment created in the previous step. For example, if using conda:
@@ -15,12 +15,12 @@ conda create -n FluViewer -f FluViewer_v_0_1_x.yaml
 conda activate FluViewer
 ```
 
-3. Install the latest version of FluViewer from the Python Packing Index (PyPI).
+3. Install the latest version of FluViewer from this repo.
 ```
-pip3 install FluViewer
+pip3 install .
 ```
 
-4. Download and unzip the default FluViewer DB (FluViewer_db.fa.gz) provided in this repository. Custom DBs can be created and used as well (instructions below).
+4. Download and unzip the default FluViewer DB (FluViewer_db.fa.gz) provided in [the BCCDC-PHL/FluViewer-db](https://github.com/BCCDC-PHL/FluViewer-db) repository. Custom DBs can be created and used as well (instructions below).
 
 ## Usage
 ```
