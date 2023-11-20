@@ -9,6 +9,7 @@ setup(
     entry_points={
         "console_scripts": [
             "FluViewer = fluviewer.fluviewer:main",
+            "fluviewer = fluviewer.fluviewer:main",
         ]
     },
     scripts=[],
