@@ -185,6 +185,18 @@ def make_scaffolding_plots(alignment: list[dict], scaffold: dict, output: Path) 
 def make_plots(inputs, outdir, out_name):
     """
     Generate plots for the analysis.
+
+    :param inputs: The inputs dictionary. Expected keys are:
+                   ['depth_of_cov_freebayes', 'alignment', 'depth_of_cov_freebayes',
+                    'low_coverage_positions', 'ambiguous_positions', 'variant_positions',
+                    'segment_contigs_alignments', 'scaffolds']
+    :type inputs: dict
+    :param outdir: The output directory.
+    :type outdir: str
+    :param out_name: The output name.
+    :type out_name: str
+    :return: The analysis summary. Keys are ['timestamp_analysis_start', 'inputs', 'outputs', 'timestamp_analysis_complete']
+    :rtype: dict
     """
     timestamp_analysis_start = datetime.datetime.now().isoformat()
     analysis_summary = {
@@ -222,6 +234,11 @@ def make_plots(inputs, outdir, out_name):
     ]
     outputs['scaffold_alignment_plots'] = {}
     for segment in segments:
+
+        if segment not in inputs['segment_contigs_alignments']:
+            log.warning(f'No contig alignment file found for segment {segment}. Skipping...')
+            continue
+
         contig_alignment_path  = inputs['segment_contigs_alignments'][segment]
         if not os.path.exists(contig_alignment_path):
             log.warning(f'Contig alignment file {contig_alignment_path} does not exist. Skipping...')
