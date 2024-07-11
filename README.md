@@ -8,7 +8,7 @@ This codebase is derived from [KevinKuchinski/FluViewer](https://github.com/Kevi
 
 ## Analysis Stages
 
-0. **Read Normalization**: The provided reads are normalized and downsampled using a kmer-based approach from [bbmap](https://sourceforge.net/projects/bbmap) called `bbnorm`. This reduces any excessive coverage of certain genome regions.
+0. **Read Normalization**: (Optional) The provided reads are normalized and downsampled using a kmer-based approach from [bbmap](https://sourceforge.net/projects/bbmap) called `bbnorm`. This reduces any excessive coverage of certain genome regions.
 
 1. **Assemble Contigs**: The normalized/downsampled reads are assembled de novo into contigs with the [spades](https://github.com/ablab/spades) assembler.
 
@@ -54,17 +54,17 @@ Each stage selects its inputs from the `outputs` of the previous stages's analys
 
 ```mermaid
 flowchart TD
-  forward_reads[Forward Reads] -- input_reads_fwd --> normalization(Read Normalization)
+  forward_reads[Forward Reads] -- input_reads_fwd --> normalization("Read Normalization (Optional)")
   reverse_reads[Reverse Reads] -- input_reads_rev --> normalization
-  normalization -- normalized_reads_fwd --> assemble_contigs(Assemble Contigs)
-  normalization -- normalized_reads_rev --> assemble_contigs
+  normalization -- reads_fwd --> assemble_contigs(Assemble Contigs)
+  normalization -- reads_rev --> assemble_contigs
   fluviewer_db[FluViewer DB] --> blast_contigs(BLAST Contigs)
   assemble_contigs -- contigs --> blast_contigs
   blast_contigs -- filtered_contig_blast_results --> scaffolding(Scaffolding)
   fluviewer_db --> scaffolding
   scaffolding -- filtered_scaffold_blast_results --> read_mapping(Read Mapping)
-  normalization -- normalized_reads_fwd --> read_mapping
-  normalization -- normalized_reads_rev --> read_mapping
+  normalization -- reads_fwd --> read_mapping
+  normalization -- reads_rev --> read_mapping
   fluviewer_db --> read_mapping
   read_mapping -- mapping_refs --> variant_calling(Variant Calling)
   read_mapping -- alignment --> variant_calling
@@ -101,8 +101,8 @@ Custom DBs can be created and used as well (instructions below).
 ## Usage
 
 ```
-usage: fluviewer [-h] -f FORWARD_READS -r REVERSE_READS -d DB [-o OUTDIR] -n OUTPUT_NAME [-i [0-100]] [-l [32-]] [-D [1-]] [-q [0-]] [-v [0-1]] [-V [0-1]] [-N [1-]] [-L [1-]] [-t [1-]] [-M [1-]] [-g] [--force]
-                 [--log-level {info,debug}] [--version]
+usage: fluviewer [-h] -f FORWARD_READS -r REVERSE_READS -d DB [-o OUTDIR] -n OUTPUT_NAME [-i [0-100]] [-l [32-]] [-D [1-]] [-q [0-]] [-v [0-1]] [-V [0-1]] [-N [1-]] [-L [1-]] [-t [1-]] [-M [1-]] [-g] [--skip-depth-normalization]
+                 [--force] [--log-level {info,debug}] [--version]
 
 BCCDC-PHL/FluViewer: Influenza A virus consensus sequence generation and variant calling
 
@@ -112,8 +112,7 @@ optional arguments:
                         Path to FASTQ file containing forward reads
   -r REVERSE_READS, --reverse-reads REVERSE_READS
                         Path to FASTQ file containing reverse reads
-  -d DATABASE, --db DATABASE
-                        Path to FASTA file containing FluViewer database
+  -d DB, --db DB        Path to FASTA file containing FluViewer database
   -o OUTDIR, --outdir OUTDIR
                         Output directory (default=FluViewer_<output-name>)
   -n OUTPUT_NAME, --output-name OUTPUT_NAME
@@ -140,12 +139,19 @@ optional arguments:
                         Gigabytes of memory allocated for normalizing reads (default=max)
   -g, --disable-garbage-collection
                         Disable garbage collection and retain intermediate analysis files
+  --skip-depth-normalization
+                        Skip read depth normalization (bbnorm) stage.
   --force               Allow overwrite of existing files and directories.
   --log-level {info,debug}
                         Log level (default=info)
   --version             show program's version number and exit
 ```
 
+### Depth Normalization
+
+Depending on the library preparation method used, some libraries get much higher depth of coverage near the
+ends of each segment.
+The `normalize_depth` stage is intended to normalize the depth-of-coverage across each segment to a consistent level, but this stage is optional. If you would like to skip the `normalize_depth` stage, simply add the `--skip-depth-normalization` flag. If that flag is used, the `assemble_contigs` stage will start directly with the set of reads supplied with the `--forward-reads` (`-f`) and `--reverse-reads` (`-r`) flags.
 
 ## FluViewer Database
 
